@@ -105,6 +105,9 @@ func Load(filePath string, salt string) (string, error)
 
 > ℹ️ **パーミッション検証に関する注意:** `Load` 実行時、ファイルのパーミッションが `0600` でない場合、`hwvault` はエラーにはせず警告を出力します（バックアップから復元したファイル等の正当な利用ケースを妨げないため）。
 
+> ⚠️ **Windows環境に関する注意:** Windows（NTFS）にはUnix系のようなパーミッションビットのモデルが存在しません。Windows上の`os.Chmod`/`FileInfo.Mode()`は読み取り専用属性のON/OFFしか制御できないため、保存されたファイルは`0600`ではなく`0666`（書き込み可）として観測されます。これはhwvaultの欠陥ではなく、GoランタイムおよびNTFSの制約による既知の仕様です。詳細は[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)を参照してください。
+
+
 ### 低レベルAPI
 
 
