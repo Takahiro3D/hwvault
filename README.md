@@ -105,6 +105,9 @@ func Load(filePath string, salt string) (string, error)
 
 > ℹ️ **Note on file permission checks:** On `Load`, if the file's permissions are not `0600`, `hwvault` emits a warning (does not fail) rather than an error, since strict enforcement on read could break legitimate use cases (e.g. files restored from backup).
 
+> ⚠️ **Note on Windows:** Windows (NTFS) does not have a POSIX-style permission bit model. `os.Chmod`/`FileInfo.Mode()` on Windows can only toggle the read-only attribute, so a saved file will be reported as `0666` (writable) rather than exactly `0600`. This is a known limitation of the Go runtime / NTFS, not a defect in hwvault. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
+
+
 ### Low-level API
 
 

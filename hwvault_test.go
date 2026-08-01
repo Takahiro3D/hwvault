@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -127,16 +128,25 @@ func TestSaveLoad_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat failed: %v", err)
 	}
-	if info.Mode().Perm() != filePerm {
-		t.Fatalf("file permission = %o, want %o", info.Mode().Perm(), filePerm)
-	}
 
 	dirInfo, err := os.Stat(filepath.Dir(path))
 	if err != nil {
 		t.Fatalf("stat dir failed: %v", err)
 	}
-	if dirInfo.Mode().Perm() != dirPerm {
-		t.Fatalf("dir permission = %o, want %o", dirInfo.Mode().Perm(), dirPerm)
+
+	// Windows does not have a POSIX-style permission bit model; os.Chmod
+	// on Windows can only toggle the read-only attribute, so a saved file
+	// will report as 0666 (or 0444 if read-only) rather than exactly
+	// 0600. Strict permission-bit checks are therefore only meaningful on
+	// POSIX-like platforms (Linux/macOS). See docs/ARCHITECTURE.md for
+	// details.
+	if runtime.GOOS != "windows" {
+		if info.Mode().Perm() != filePerm {
+			t.Fatalf("file permission = %o, want %o", info.Mode().Perm(), filePerm)
+		}
+		if dirInfo.Mode().Perm() != dirPerm {
+			t.Fatalf("dir permission = %o, want %o", dirInfo.Mode().Perm(), dirPerm)
+		}
 	}
 
 	got, err := Load(path, testSalt)
