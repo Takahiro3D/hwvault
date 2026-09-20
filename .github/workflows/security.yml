@@ -6,8 +6,9 @@ permissions:
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
-    # 6 ヶ月ごとに実行（偶数月の 1 日）
     - cron: '0 0 1 */6 *'
   workflow_dispatch:
 
