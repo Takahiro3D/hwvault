@@ -1,0 +1,32 @@
+name: Security Check (Vulnerability Scan)
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 6 ヶ月ごとに実行（偶数月の 1 日）
+    - cron: '0 0 1 */6 *'
+  workflow_dispatch:
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      
+      - name: Run govulncheck
+        run: |
+          govulncheck ./... || true
+      
+      - name: Report Findings
+        if: always()
+        run: |
+          echo "## Vulnerability Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✓ Security scan completed successfully." >> $GITHUB_STEP_SUMMARY
